@@ -146,7 +146,7 @@ bool setContractType(uint8_t type, void * out){
             break;
         case WITNESSUPDATECONTRACT:
             os_memmove(out,"Witness Update\0", 15);
-            break; 
+            break;
         case PARTICIPATEASSETISSUECONTRACT:
             os_memmove(out,"Participate Asset\0", 18);
             break;
@@ -177,7 +177,7 @@ bool setContractType(uint8_t type, void * out){
         case PROPOSALDELETECONTRACT:
             os_memmove(out,"Proposal Delete\0", 16);
             break;
-        default: 
+        default:
         return false;
     };
     return true;
@@ -197,7 +197,7 @@ bool setExchangeContractDetail(uint8_t type, void * out){
         case EXCHANGETRANSACTIONCONTRACT:
             os_memmove((void *)out,"transaction\0", 12);
             break;
-        default: 
+        default:
         return false;
     };
     return true;
@@ -216,8 +216,8 @@ parserStatus_e parseTokenName(uint8_t token_id, uint8_t *data, uint32_t dataLeng
         TRY {
             // Get Token Name
             if ((data[index]>>PB_FIELD_R)!=1 || (data[index]&PB_TYPE)!=2 ) THROW(0x6a80);
-            index++;if (index>dataLength) THROW(0x6a80); 
-            tokenNameValidationLength=data[index]; if (tokenNameValidationLength > 32) THROW(0x6a80); 
+            index++;if (index>dataLength) THROW(0x6a80);
+            tokenNameValidationLength=data[index]; if (tokenNameValidationLength > 32) THROW(0x6a80);
             index++;if (index+tokenNameValidationLength > dataLength) THROW(0x6a80);
             os_memmove(tokenNameValidation,data+index,tokenNameValidationLength);
             tokenNameValidation[tokenNameValidationLength]='\0';
@@ -236,14 +236,14 @@ parserStatus_e parseTokenName(uint8_t token_id, uint8_t *data, uint32_t dataLeng
             index++;if (index > dataLength) THROW(0x6a88);
             // Get Signature
             if ((data[index]>>PB_FIELD_R)!=3 || (data[index]&PB_TYPE)!=2 ) THROW(0x6a80);
-            index++;if (index>dataLength) THROW(0x6a80); 
+            index++;if (index>dataLength) THROW(0x6a80);
             index++;if (index+data[index-1] > dataLength) THROW(0x6a80);
             // Validate token ID + Name
             int ret = verifyTokenNameID((const char *)content->tokenNames[token_id],(const char *)tokenNameValidation,
                         decimals,(uint8_t *)data+index, data[index-1], content->publicKeyContext);
             if (ret!=1)
                 THROW(0x6a80);
-            
+
             // UPDATE Token with Name[ID]
             uint8_t tmp[MAX_TOKEN_LENGTH];
 
@@ -252,7 +252,7 @@ parserStatus_e parseTokenName(uint8_t token_id, uint8_t *data, uint32_t dataLeng
             content->tokenNamesLength[token_id] = strlen((const char *)tmp);
             os_memmove(content->tokenNames[token_id], tmp, content->tokenNamesLength[token_id]+1);
             content->decimals[token_id]=decimals;
-            
+
 
             result = USTREAM_FINISHED;
         }
@@ -282,7 +282,7 @@ parserStatus_e parseExchange(uint8_t token_id, uint8_t *data, uint32_t dataLengt
     uint8_t len = 0;
     BEGIN_TRY {
         TRY {
-            
+
             // Get Exchange ID
             if ((data[index]>>PB_FIELD_R)!=1 || (data[index]&PB_TYPE)!=0 ) THROW(0x6a80);
             index++;if (index>dataLength) THROW(0x6a80);
@@ -298,8 +298,8 @@ parserStatus_e parseExchange(uint8_t token_id, uint8_t *data, uint32_t dataLengt
             if (content->exchangeID!= ID) THROW(0x6a80);
             // Get Token ID 1
             if ((data[index]>>PB_FIELD_R)!=2 || (data[index]&PB_TYPE)!=2 ) THROW(0x6a80);
-            index++;if (index>dataLength) THROW(0x6a80); 
-            if ((data[index] != 7) && (data[index] != 1) ) THROW(0x6a80); 
+            index++;if (index>dataLength) THROW(0x6a80);
+            if ((data[index] != 7) && (data[index] != 1) ) THROW(0x6a80);
             index++;if (index+data[index-1] > dataLength) THROW(0x6a80);
             os_memmove(tokenID[0],data+index,data[index-1]);
             len += data[index-1];
@@ -307,8 +307,8 @@ parserStatus_e parseExchange(uint8_t token_id, uint8_t *data, uint32_t dataLengt
             index+=data[index-1]; if (index>dataLength) THROW(0x6a80);
             // Get Token 1 Name
             if ((data[index]>>PB_FIELD_R)!=3 || (data[index]&PB_TYPE)!=2 ) THROW(0x6a80);
-            index++;if (index>dataLength) THROW(0x6a80); 
-            if (data[index] > 32) THROW(0x6a80); 
+            index++;if (index>dataLength) THROW(0x6a80);
+            if (data[index] > 32) THROW(0x6a80);
             index++;if (index+data[index-1] > dataLength) THROW(0x6a80);
             os_memmove(tokenNAME[0],data+index,data[index-1]);
             len += data[index-1];
@@ -329,8 +329,8 @@ parserStatus_e parseExchange(uint8_t token_id, uint8_t *data, uint32_t dataLengt
 
             // Get Token ID 2
             if ((data[index]>>PB_FIELD_R)!=5 || (data[index]&PB_TYPE)!=2 ) THROW(0x6a80);
-            index++;if (index>dataLength) THROW(0x6a80); 
-            if ((data[index] != 7) && (data[index] != 1) ) THROW(0x6a80); 
+            index++;if (index>dataLength) THROW(0x6a80);
+            if ((data[index] != 7) && (data[index] != 1) ) THROW(0x6a80);
             index++;if (index+data[index-1] > dataLength) THROW(0x6a80);
             os_memmove(tokenID[1],data+index,data[index-1]);
             len += data[index-1];
@@ -338,8 +338,8 @@ parserStatus_e parseExchange(uint8_t token_id, uint8_t *data, uint32_t dataLengt
             index+=data[index-1]; if (index>dataLength) THROW(0x6a80);
             // Get Token 2 Name
             if ((data[index]>>PB_FIELD_R)!=6 || (data[index]&PB_TYPE)!=2 ) THROW(0x6a80);
-            index++;if (index>dataLength) THROW(0x6a80); 
-            if (data[index] > 32) THROW(0x6a80); 
+            index++;if (index>dataLength) THROW(0x6a80);
+            if (data[index] > 32) THROW(0x6a80);
             index++;if (index+data[index-1] > dataLength) THROW(0x6a80);
             os_memmove(tokenNAME[1],data+index,data[index-1]);
             len += data[index-1];
@@ -360,7 +360,7 @@ parserStatus_e parseExchange(uint8_t token_id, uint8_t *data, uint32_t dataLengt
 
             // Get Signature
             if ((data[index]>>PB_FIELD_R)!=8 || (data[index]&PB_TYPE)!=2 ) THROW(0x6a80);
-            index++;if (index>dataLength) THROW(0x6a80); 
+            index++;if (index>dataLength) THROW(0x6a80);
             index++;if (index+data[index-1] > dataLength) THROW(0x6a80);
 
             snprintf((char *)buffer, sizeof(buffer), "%d", ID);
@@ -370,11 +370,11 @@ parserStatus_e parseExchange(uint8_t token_id, uint8_t *data, uint32_t dataLengt
                         tokenID[1], tokenNAME[1], tokenDecimals[1]);
 
             // Validate token ID + Name
-            int ret = verifyExchangeID((const unsigned char *)buffer, len + 2, 
+            int ret = verifyExchangeID((const unsigned char *)buffer, len + 2,
                             (uint8_t *)data+index, data[index-1], content->publicKeyContext);
             if (ret!=1)
                 THROW(0x6a80);
-            
+
             // UPDATE Token with Name[ID]
             uint8_t firstToken = 0;
             uint8_t secondToken = 0;
@@ -387,7 +387,7 @@ parserStatus_e parseExchange(uint8_t token_id, uint8_t *data, uint32_t dataLengt
             }else{
                 THROW(0x6a80);
             }
-            
+
             snprintf((char *)buffer, MAX_TOKEN_LENGTH,"%s[%s]",
                 tokenNAME[0], tokenID[0]);
             os_memmove(content->tokenNames[firstToken], buffer, strlen((const char *)buffer)+1);
@@ -424,7 +424,7 @@ parserStatus_e parseExchange(uint8_t token_id, uint8_t *data, uint32_t dataLengt
     cx_sha256_init(sha2); //init sha
 }
 
-uint8_t parseVariant(txContext_t *context, uint8_t *data, 
+uint8_t parseVariant(txContext_t *context, uint8_t *data,
     uint8_t *index, uint8_t dataLength, uint64_t *result){
     uint8_t count = 0;
     if (result!= NULL) *result = 0;
@@ -435,7 +435,7 @@ uint8_t parseVariant(txContext_t *context, uint8_t *data,
         if ((data[*index+count]&PB_BASE128) == 0){
             *index+=(count+1);
             return count+1;
-        } 
+        }
         b128+=7;
     }
     PRINTF("Error parsing variant...\n");
@@ -477,7 +477,7 @@ uint8_t parseTokenID(txContext_t *context, uint8_t *data, uint8_t *index,
         out[*outLength]=0;
         (*index) += (*outLength);
         return *outLength;
-        
+
 }
 
 uint8_t parseAddress(txContext_t *context, uint8_t *data, uint8_t *index,
@@ -504,7 +504,7 @@ uint16_t processTx(txContext_t *context, uint8_t *buffer,
 
     if (length==0) return USTREAM_FINISHED;
 
-    BEGIN_TRY { 
+    BEGIN_TRY {
         TRY {
 
             if (context->getNext>0){
@@ -516,7 +516,7 @@ uint16_t processTx(txContext_t *context, uint8_t *buffer,
                 offset = (uint8_t)(context->getNext&0xFF);
                 context->getNext = 0;
             }
-                    
+
             while (offset != length) {
                 uint64_t tmpNumber = 0;
                 uint8_t count = 0;
@@ -528,7 +528,7 @@ uint16_t processTx(txContext_t *context, uint8_t *buffer,
                 uint8_t field = (buffer[offset]>>PB_FIELD_R);
                 uint8_t type = (buffer[offset]&PB_TYPE);
                 offset++;
-                
+
                 PRINTF("Stage: %d, Case: %d, Type: %d \n",context->stage, field, type);
                 switch(context->stage) {
                     case 0:
@@ -536,22 +536,22 @@ uint16_t processTx(txContext_t *context, uint8_t *buffer,
                         switch(field) {
                             case 1: //ref_block_bytes
                                 if (type!=2) THROW(0x6a80);
-                                count = parseVariant(context, buffer, &offset, 
+                                count = parseVariant(context, buffer, &offset,
                                                         length, &tmpNumber);
                                 offset += (uint8_t)(tmpNumber&0xFF);
                                 break; //skip
                             case 3: //ref_block_num
-                                count = parseVariant(context, buffer, &offset, 
+                                count = parseVariant(context, buffer, &offset,
                                                         length, NULL);
                                 break; //skip
                             case 4: //ref_block_hash
                                 if (type!=2) THROW(0x6a80);
-                                count = parseVariant(context, buffer, &offset, 
+                                count = parseVariant(context, buffer, &offset,
                                                         length, &tmpNumber);
                                 offset += (uint8_t)(tmpNumber&0xFF);
                                 break; //skip
                             case 8: //expiration
-                                count = parseVariant(context, buffer, &offset, 
+                                count = parseVariant(context, buffer, &offset,
                                                         length, NULL);
                                 break; //skip
                             case 10:
@@ -559,10 +559,10 @@ uint16_t processTx(txContext_t *context, uint8_t *buffer,
                                 if (!dataAllowed) THROW(0x6a80);
                                 // parse data
                                 if (type!=2) THROW(0x6a80);
-                                count = parseVariant(context, buffer, &offset, 
+                                count = parseVariant(context, buffer, &offset,
                                                         length, &tmpNumber);
                                 content->dataBytes = tmpNumber;
-                                
+
                                 if (tmpNumber>255 || (tmpNumber+offset)>length) {
                                     context->getNext = (uint32_t)(tmpNumber);
                                     context->getNext += offset;
@@ -575,22 +575,22 @@ uint16_t processTx(txContext_t *context, uint8_t *buffer,
                             case 11:
                                 // parse contract
                                 if (type!=2) THROW(0x6a80);
-                                count = parseVariant(context, buffer, &offset, 
+                                count = parseVariant(context, buffer, &offset,
                                                         length, &tmpNumber);
                                 context->stageQueue[0].total = (uint16_t)(tmpNumber&0xFFFF);
                                 context->stageQueue[0].count = 0;
-                                context->stage = 1; 
+                                context->stage = 1;
                                 break;
                             case 12: // scripts
                                 if (type!=2) THROW(0x6a80);
-                                count = parseVariant(context, buffer, &offset, 
+                                count = parseVariant(context, buffer, &offset,
                                                         length, &tmpNumber);
-                                if (tmpNumber>255) THROW(0x6a80);    
+                                if (tmpNumber>255) THROW(0x6a80);
                                 offset += (uint8_t)(tmpNumber&0xFF);
                                 break; //skip
                             case 14: // timestamp
                             case 18: // fee_limit
-                                count = parseVariant(context, buffer, &offset, 
+                                count = parseVariant(context, buffer, &offset,
                                                         length, NULL);
                                 break; //skip
                         }
@@ -600,7 +600,7 @@ uint16_t processTx(txContext_t *context, uint8_t *buffer,
                         switch(field) {
                             case 1: //ContractType
                                 if (type!=0) THROW(0x6a80);
-                                count = parseVariant(context, buffer, &offset, 
+                                count = parseVariant(context, buffer, &offset,
                                                         length, &tmpNumber);
                                 count++;
                                 content->contractType = (uint8_t)(tmpNumber&0xFF);
@@ -608,12 +608,12 @@ uint16_t processTx(txContext_t *context, uint8_t *buffer,
                                 break;
                             case 2: // parameter
                                 if (type!=2) THROW(0x6a80);
-                                count = parseVariant(context, buffer, &offset, 
+                                count = parseVariant(context, buffer, &offset,
                                                         length, NULL);
                                 // Get Payload type.googleapis
                                 if (buffer[offset]!=0x0A) THROW(0x6a80);
                                 offset++; count++;
-                                count += parseVariant(context, buffer, &offset, 
+                                count += parseVariant(context, buffer, &offset,
                                                         length, &tmpNumber);
 
                                 if ((tmpNumber)>255) THROW(0x6a80);
@@ -629,20 +629,20 @@ uint16_t processTx(txContext_t *context, uint8_t *buffer,
                                 // Contract Details
                                 // Check length
                                 if (buffer[offset]!=0x12) THROW(0x6a80); // 0x12 Field 2 type String
-                                offset++; count++; 
-                                count += parseVariant(context, buffer, &offset, 
+                                offset++; count++;
+                                count += parseVariant(context, buffer, &offset,
                                                         length, &tmpNumber);
                                 PRINTF("Contract Size: %d\n",(uint32_t)tmpNumber);
                                 context->stageQueue[1].total = (uint16_t)(tmpNumber&0xFFFF);
                                 context->stageQueue[1].count = 0;
-                                context->stage = 2; 
+                                context->stage = 2;
                                 count++;
                                 break;
-                                
+
                             case 3: //provider
                             case 4: //ContractName
                                 if (type!=2) THROW(0x6a80);
-                                count = parseVariant(context, buffer, &offset, 
+                                count = parseVariant(context, buffer, &offset,
                                                         length, &tmpNumber);
                                 if ((offset+tmpNumber)>255) THROW(0x6a80);
                                 offset += (uint8_t)(tmpNumber&0xFF);
@@ -651,7 +651,7 @@ uint16_t processTx(txContext_t *context, uint8_t *buffer,
                             case 5: //Permission_id
                                 if (type!=0) THROW(0x6a80);
                                 // get id
-                                count = parseVariant(context, buffer, &offset, 
+                                count = parseVariant(context, buffer, &offset,
                                             length, &tmpNumber);
                                 if (tmpNumber>9) THROW(0x6a80); // Valid only from 0 - 9
                                 content->permission_id = (uint8_t)(tmpNumber&0xFF);
@@ -676,14 +676,14 @@ uint16_t processTx(txContext_t *context, uint8_t *buffer,
                                         content->tokenNamesLength[0]=4;
                                         os_memmove(content->tokenNames[0],"TRX\0",content->tokenNamesLength[0]);
                                         // get owner address
-                                        count = parseAddress(context, buffer, &offset, length, 
+                                        count = parseAddress(context, buffer, &offset, length,
                                                 content->account);
                                         if (count==0) break;
                                         count+=2;
                                         break;
                                     case 2: //to_address
                                         if (type!=2) THROW(0x6a80);
-                                        count = parseAddress(context, buffer, &offset, length, 
+                                        count = parseAddress(context, buffer, &offset, length,
                                                 content->destination);
                                         if (count==0) break;
                                         count+=2;
@@ -691,7 +691,7 @@ uint16_t processTx(txContext_t *context, uint8_t *buffer,
                                     case 3: //amount
                                         if (type!=0) THROW(0x6a80);
                                         // get amount
-                                        count = parseVariant(context, buffer, &offset, 
+                                        count = parseVariant(context, buffer, &offset,
                                                         length, &content->amount);
                                         count += 1;
                                         break;
@@ -704,7 +704,7 @@ uint16_t processTx(txContext_t *context, uint8_t *buffer,
                                 switch(field) {
                                     case 1: // Token ID
                                         if (type!=2) THROW(0x6a80);
-                                        count = parseTokenID(context, buffer, &offset, length, 
+                                        count = parseTokenID(context, buffer, &offset, length,
                                                 content->tokenNames[0], &content->tokenNamesLength[0]);
                                         if (count==0) break;
                                         content->tokenNamesLength[0]=TOKENID_SIZE;
@@ -712,14 +712,14 @@ uint16_t processTx(txContext_t *context, uint8_t *buffer,
                                         break;
                                     case 2: //owner_address
                                         if (type!=2) THROW(0x6a80);
-                                        count = parseAddress(context, buffer, &offset, length, 
+                                        count = parseAddress(context, buffer, &offset, length,
                                                 content->account);
                                         if (count==0) break;
                                         count+=2;
                                         break;
                                     case 3: //to_address
                                         if (type!=2) THROW(0x6a80);
-                                        count = parseAddress(context, buffer, &offset, length, 
+                                        count = parseAddress(context, buffer, &offset, length,
                                                 content->destination);
                                         if (count==0) break;
                                         count+=2;
@@ -727,7 +727,7 @@ uint16_t processTx(txContext_t *context, uint8_t *buffer,
                                     case 4: //amount
                                         if (type!=0) THROW(0x6a80);
                                         // get amount
-                                        count = parseVariant(context, buffer, &offset, 
+                                        count = parseVariant(context, buffer, &offset,
                                                         length, &content->amount);
                                         count += 1;
                                         break;
@@ -737,31 +737,31 @@ uint16_t processTx(txContext_t *context, uint8_t *buffer,
                                 }
                             break;
                             case TRIGGERSMARTCONTRACT:
-                            switch(field) {
+                                switch(field) {
                                     case 1: //owner_address
                                         if (type!=2) THROW(0x6a80);
-                                        count = parseAddress(context, buffer, &offset, length, 
+                                        count = parseAddress(context, buffer, &offset, length,
                                                 content->account);
                                         if (count==0) break;
                                         count+=2;
                                         break;
                                     case 2: //contract_address
                                         if (type!=2) THROW(0x6a80);
-                                        count = parseAddress(context, buffer, &offset, length, 
+                                        count = parseAddress(context, buffer, &offset, length,
                                                 content->contractAddress);
                                         if (count==0) break;
                                         count+=2;
                                         break;
                                     case 3: //call_value
                                         if (type!=0) THROW(0x6a80);
-                                        count = parseVariant(context, buffer, &offset, 
+                                        count = parseVariant(context, buffer, &offset,
                                                         length, &content->amount);
                                         count += 1;
                                         break;
                                     case 4: //data
                                         PRINTF("Parsing SmartContract DATA\n");
                                         if (type!=2) THROW(0x6a80);
-                                        count = parseVariant(context, buffer, &offset, 
+                                        count = parseVariant(context, buffer, &offset,
                                                     length, &tmpNumber);
                                         PRINTF("COUNT: %d, contract length: %d\n",count,(uint32_t)tmpNumber);
                                         // check if data is complete, if not add to queue buffer
@@ -814,37 +814,37 @@ uint16_t processTx(txContext_t *context, uint8_t *buffer,
                                     case 5: //call_token_value
                                         if (type!=0) THROW(0x6a80);
                                         // get amount
-                                        count = parseVariant(context, buffer, &offset, 
+                                        count = parseVariant(context, buffer, &offset,
                                                         length, &content->amount2);
                                         count += 1;
                                         break;
                                     case 6: //token_id
                                         if (type!=0) THROW(0x6a80);
                                         // get token id
-                                        count = parseVariant(context, buffer, &offset, 
+                                        count = parseVariant(context, buffer, &offset,
                                                         length, &tmpNumber);
                                         count += 1;
                                         snprintf((char *)content->tokenNames[0], MAX_TOKEN_LENGTH,
-                                                "%d",(uint32_t)tmpNumber);                                                
-                                        content->tokenNamesLength[0] = strlen((const char *)content->tokenNames[0]);                                        
+                                                "%d",(uint32_t)tmpNumber);
+                                        content->tokenNamesLength[0] = strlen((const char *)content->tokenNames[0]);
                                         break;
                                     default:
                                         // INVALID
                                         THROW(0x6a80);
                                 }
                             break;
-                            case EXCHANGECREATECONTRACT: 
+                            case EXCHANGECREATECONTRACT:
                                 switch(field) {
                                     case 1: //owner_address
                                         if (type!=2) THROW(0x6a80);
-                                        count = parseAddress(context, buffer, &offset, length, 
+                                        count = parseAddress(context, buffer, &offset, length,
                                                 content->account);
                                         if (count==0) break;
                                         count+=2;
                                         break;
                                     case 2: //First Token
                                         if (type!=2) THROW(0x6a80);
-                                        count = parseTokenID(context, buffer, &offset, length, 
+                                        count = parseTokenID(context, buffer, &offset, length,
                                                 content->tokenNames[0], &content->tokenNamesLength[0]);
                                         if (count==0) break;
                                         count+=2;
@@ -852,13 +852,13 @@ uint16_t processTx(txContext_t *context, uint8_t *buffer,
                                     case 3: //First Token Amount
                                         if (type!=0) THROW(0x6a80);
                                         // get amount
-                                        count = parseVariant(context, buffer, &offset, 
+                                        count = parseVariant(context, buffer, &offset,
                                                         length, &content->amount);
                                         count += 1;
                                         break;
                                     case 4: //First Token
                                         if (type!=2) THROW(0x6a80);
-                                        count = parseTokenID(context, buffer, &offset, length, 
+                                        count = parseTokenID(context, buffer, &offset, length,
                                                 content->tokenNames[1], &content->tokenNamesLength[1]);
                                         if (count==0) break;
                                         count+=2;
@@ -866,7 +866,7 @@ uint16_t processTx(txContext_t *context, uint8_t *buffer,
                                     case 5: //First Token Amount
                                         if (type!=0) THROW(0x6a80);
                                         // get amount
-                                        count = parseVariant(context, buffer, &offset, 
+                                        count = parseVariant(context, buffer, &offset,
                                                         length, &content->amount2);
                                         count += 1;
                                         break;
@@ -880,27 +880,27 @@ uint16_t processTx(txContext_t *context, uint8_t *buffer,
                                 switch(field) {
                                     case 1: //owner_address
                                         if (type!=2) THROW(0x6a80);
-                                        count = parseAddress(context, buffer, &offset, length, 
+                                        count = parseAddress(context, buffer, &offset, length,
                                                 content->account);
                                         if (count==0) break;
                                         count+=2;
                                         break;
                                     case 2: //Exchange id
                                         if (type!=0) THROW(0x6a80);
-                                        count = parseVariant(context, buffer, &offset, 
+                                        count = parseVariant(context, buffer, &offset,
                                                         length, &content->exchangeID);
                                         count += 1;
                                         break;
                                     case 3: //Token ID
                                         if (type!=2) THROW(0x6a80);
-                                        count = parseTokenID(context, buffer, &offset, length, 
+                                        count = parseTokenID(context, buffer, &offset, length,
                                                 content->tokenNames[0], &content->tokenNamesLength[0]);
                                         if (count==0) break;
                                         count+=2;
                                         break;
                                     case 4: //Token Amount
                                         if (type!=0) THROW(0x6a80);
-                                        count = parseVariant(context, buffer, &offset, 
+                                        count = parseVariant(context, buffer, &offset,
                                                         length, &content->amount);
                                         count += 1;
                                         break;
@@ -913,33 +913,33 @@ uint16_t processTx(txContext_t *context, uint8_t *buffer,
                                 switch(field) {
                                     case 1: //owner_address
                                         if (type!=2) THROW(0x6a80);
-                                        count = parseAddress(context, buffer, &offset, length, 
+                                        count = parseAddress(context, buffer, &offset, length,
                                                 content->account);
                                         if (count==0) break;
                                         count+=2;
                                         break;
                                     case 2: //Exchange id
                                         if (type!=0) THROW(0x6a80);
-                                        count = parseVariant(context, buffer, &offset, 
+                                        count = parseVariant(context, buffer, &offset,
                                                         length, &content->exchangeID);
                                         count += 1;
                                         break;
                                     case 3: //Token ID
                                         if (type!=2) THROW(0x6a80);
-                                        count = parseTokenID(context, buffer, &offset, length, 
+                                        count = parseTokenID(context, buffer, &offset, length,
                                                 content->tokenNames[0], &content->tokenNamesLength[0]);
                                         if (count==0) break;
                                         count+=2;
                                         break;
                                     case 4: //Token Amount
                                         if (type!=0) THROW(0x6a80);
-                                        count = parseVariant(context, buffer, &offset, 
+                                        count = parseVariant(context, buffer, &offset,
                                                         length, &content->amount);
                                         count += 1;
                                         break;
                                     case 5: //Expected Amount
                                         if (type!=0) THROW(0x6a80);
-                                        count = parseVariant(context, buffer, &offset, 
+                                        count = parseVariant(context, buffer, &offset,
                                                         length, &content->amount2);
                                         count += 1;
                                         break;
@@ -952,7 +952,7 @@ uint16_t processTx(txContext_t *context, uint8_t *buffer,
                                 switch(field) {
                                     case 1: //owner_address
                                         if (type!=2) THROW(0x6a80);
-                                        count = parseAddress(context, buffer, &offset, length, 
+                                        count = parseAddress(context, buffer, &offset, length,
                                                 content->account);
                                         if (count==0) break;
                                         count+=2;
@@ -960,7 +960,7 @@ uint16_t processTx(txContext_t *context, uint8_t *buffer,
                                         break;
                                     case 2: //votes
                                         if (type!=2) THROW(0x6a80);
-                                        count = parseVariant(context, buffer, &offset, 
+                                        count = parseVariant(context, buffer, &offset,
                                                                 length, &tmpNumber);
                                         if (tmpNumber>255 || (tmpNumber+offset)>length) {
                                             if (addToQueue(context, buffer+offset-count-1, length-offset+count+1 )){
@@ -983,26 +983,26 @@ uint16_t processTx(txContext_t *context, uint8_t *buffer,
                                 switch(field) {
                                     case 1: //owner_address
                                         if (type!=2) THROW(0x6a80);
-                                        count = parseAddress(context, buffer, &offset, length, 
+                                        count = parseAddress(context, buffer, &offset, length,
                                                 content->account);
                                         if (count==0) break;
                                         count+=2;
                                         break;
                                     case 2: //frozen_balance
                                         if (type!=0) THROW(0x6a80);
-                                        count = parseVariant(context, buffer, &offset, 
+                                        count = parseVariant(context, buffer, &offset,
                                             length, NULL);
                                         count += 1;
                                         break;
                                     case 3: //frozen_duration
                                         if (type!=0) THROW(0x6a80);
-                                        count = parseVariant(context, buffer, &offset, 
+                                        count = parseVariant(context, buffer, &offset,
                                             length, NULL);
                                         count += 1;
                                         break;
                                     case 10: //ResourceCode
                                         if (type!=0) THROW(0x6a80);
-                                        count = parseVariant(context, buffer, &offset, 
+                                        count = parseVariant(context, buffer, &offset,
                                             length, &tmpNumber);
                                         if (tmpNumber>1) THROW(0x6a80);
                                         content->resource=(uint8_t)(tmpNumber&0xFF);
@@ -1010,7 +1010,7 @@ uint16_t processTx(txContext_t *context, uint8_t *buffer,
                                         break;
                                     case 15: //receiver_address
                                         if (type!=2) THROW(0x6a80);
-                                        count = parseAddress(context, buffer, &offset, length, 
+                                        count = parseAddress(context, buffer, &offset, length,
                                                 content->destination);
                                         if (count==0) break;
                                         count+=2;
@@ -1024,14 +1024,14 @@ uint16_t processTx(txContext_t *context, uint8_t *buffer,
                                 switch(field) {
                                     case 1: //owner_address
                                         if (type!=2) THROW(0x6a80);
-                                        count = parseAddress(context, buffer, &offset, length, 
+                                        count = parseAddress(context, buffer, &offset, length,
                                                 content->account);
                                         if (count==0) break;
                                         count+=2;
                                         break;
                                     case 10: //ResourceCode
                                         if (type!=0) THROW(0x6a80);
-                                        count = parseVariant(context, buffer, &offset, 
+                                        count = parseVariant(context, buffer, &offset,
                                             length, &tmpNumber);
                                         if (tmpNumber>1) THROW(0x6a80);
                                         content->resource=(uint8_t)tmpNumber;
@@ -1039,7 +1039,7 @@ uint16_t processTx(txContext_t *context, uint8_t *buffer,
                                         break;
                                     case 15: //receiver_address
                                         if (type!=2) THROW(0x6a80);
-                                        count = parseAddress(context, buffer, &offset, length, 
+                                        count = parseAddress(context, buffer, &offset, length,
                                                 content->account);
                                         if (count==0) break;
                                         count+=2;
@@ -1053,7 +1053,7 @@ uint16_t processTx(txContext_t *context, uint8_t *buffer,
                                 switch(field) {
                                     case 1: //owner_address
                                         if (type!=2) THROW(0x6a80);
-                                        count = parseAddress(context, buffer, &offset, length, 
+                                        count = parseAddress(context, buffer, &offset, length,
                                                 content->account);
                                         if (count==0) break;
                                         count+=2;
@@ -1067,14 +1067,14 @@ uint16_t processTx(txContext_t *context, uint8_t *buffer,
                                 switch(field) {
                                     case 1: //owner_address
                                         if (type!=2) THROW(0x6a80);
-                                        count = parseAddress(context, buffer, &offset, length, 
+                                        count = parseAddress(context, buffer, &offset, length,
                                                 content->account);
                                         if (count==0) break;
                                         count+=2;
                                         break;
                                     case 2: //parameters
                                         if (type!=2) THROW(0x6a80);
-                                        count = parseVariant(context, buffer, &offset, 
+                                        count = parseVariant(context, buffer, &offset,
                                                                 length, &tmpNumber);
                                         if (tmpNumber>255 || (tmpNumber+offset)>length) {
                                             if (addToQueue(context, buffer+offset-count-1, length-offset+count+1 )){
@@ -1097,20 +1097,20 @@ uint16_t processTx(txContext_t *context, uint8_t *buffer,
                                 switch(field) {
                                     case 1: //owner_address
                                         if (type!=2) THROW(0x6a80);
-                                        count = parseAddress(context, buffer, &offset, length, 
+                                        count = parseAddress(context, buffer, &offset, length,
                                                 content->account);
                                         if (count==0) break;
                                         count+=2;
                                         break;
                                     case 2: //proposal id
                                         if (type!=0) THROW(0x6a80);
-                                        count = parseVariant(context, buffer, &offset, 
+                                        count = parseVariant(context, buffer, &offset,
                                             length, NULL);
                                         count += 1;
                                         break;
                                     case 3: //approval
                                         if (type!=0) THROW(0x6a80);
-                                        count = parseVariant(context, buffer, &offset, 
+                                        count = parseVariant(context, buffer, &offset,
                                             length, NULL);
                                         count += 1;
                                         break;
@@ -1123,14 +1123,14 @@ uint16_t processTx(txContext_t *context, uint8_t *buffer,
                                 switch(field) {
                                     case 1: //owner_address
                                         if (type!=2) THROW(0x6a80);
-                                        count = parseAddress(context, buffer, &offset, length, 
+                                        count = parseAddress(context, buffer, &offset, length,
                                                 content->account);
                                         if (count==0) break;
                                         count+=2;
                                         break;
                                     case 2: //Proposal id
                                         if (type!=0) THROW(0x6a80);
-                                        count = parseVariant(context, buffer, &offset, 
+                                        count = parseVariant(context, buffer, &offset,
                                             length, &content->exchangeID);
                                         count += 1;
                                         break;
@@ -1143,14 +1143,14 @@ uint16_t processTx(txContext_t *context, uint8_t *buffer,
                                 switch(field) {
                                     case 1: //account_name
                                         if (type!=2) THROW(0x6a80);
-                                        count = parseVariant(context, buffer, &offset, 
+                                        count = parseVariant(context, buffer, &offset,
                                                     length, &tmpNumber);
                                         offset += (uint8_t)(tmpNumber&0xFF);
                                         count += (uint8_t)(tmpNumber&0xFF)+1;
                                         break;
                                     case 2: //owner_address
                                         if (type!=2) THROW(0x6a80);
-                                        count = parseAddress(context, buffer, &offset, length, 
+                                        count = parseAddress(context, buffer, &offset, length,
                                                 content->account);
                                         if (count==0) break;
                                         count+=2;
@@ -1193,7 +1193,7 @@ uint16_t processTx(txContext_t *context, uint8_t *buffer,
         }
     }
     END_TRY;
-    
+
     PRINTF("processTx RESULT: %04x\n",result);
     return result;
 }
