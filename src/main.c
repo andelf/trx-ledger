@@ -1932,41 +1932,37 @@ unsigned int ui_approval_signMessage_nanos_button(unsigned int button_mask, unsi
 #endif // #if defined(TARGET_NANOS)
 
 #if defined(TARGET_NANOS)
+const bagl_element_t ui_approval_vote_witness_nanos[] = {
+    UI_BACKGROUND(),
+    UI_ICON_LEFT(0x00, BAGL_GLYPH_ICON_CROSS),
+    UI_ICON_RIGHT(0x00, BAGL_GLYPH_ICON_CHECK),
+    UI_TEXT_TOP(0x01, "Confirm"),
+    UI_TEXT_BOTTOM(0x01, "Vote for SR"),
+    UI_TEXT_TOP(0x03, "Send From"),
+    UI_TEXT_BOTTOM(0x03, fromAddress),
+    UI_TEXT_TOP(0x02, "Hash"),
+    UI_TEXT_BOTTOM(0x02, fullHash),
+};
+unsigned int ui_approval_vote_witness_nanos_button(unsigned int button_mask,
+                                     unsigned int button_mask_counter) {
+    switch (button_mask) {
+    case BUTTON_EVT_RELEASED | BUTTON_LEFT: // CANCEL
+        io_seproxyhal_touch_tx_cancel(NULL);
+        break;
+
+    case BUTTON_EVT_RELEASED | BUTTON_RIGHT: { // OK
+        io_seproxyhal_touch_tx_ok(NULL);
+        break;
+    }
+    }
+    return 0;
+}
+
+// fallback for all type of transactions
 const bagl_element_t ui_approval_simple_nanos[] = {
-    // type                               userid    x    y   w    h  str rad
-    // fill      fg        bg      fid iid  txt   touchparams...       ]
-    {{BAGL_RECTANGLE, 0x00, 0, 0, 128, 32, 0, 0, BAGL_FILL, 0x000000, 0xFFFFFF,
-      0, 0},
-     NULL,
-     0,
-     0,
-     0,
-     NULL,
-     NULL,
-     NULL},
-
-    {{BAGL_ICON, 0x00, 3, 12, 7, 7, 0, 0, 0, 0xFFFFFF, 0x000000, 0,
-      BAGL_GLYPH_ICON_CROSS},
-     NULL,
-     0,
-     0,
-     0,
-     NULL,
-     NULL,
-     NULL},
-    {{BAGL_ICON, 0x00, 117, 13, 8, 6, 0, 0, 0, 0xFFFFFF, 0x000000, 0,
-      BAGL_GLYPH_ICON_CHECK},
-     NULL,
-     0,
-     0,
-     0,
-     NULL,
-     NULL,
-     NULL},
-
-    //{{BAGL_ICON                           , 0x01,  31,   9,  14,  14, 0, 0, 0
-    //, 0xFFFFFF, 0x000000, 0, BAGL_GLYPH_ICON_EYE_BADGE  }, NULL, 0, 0, 0,
-    // NULL, NULL, NULL },
+    UI_BACKGROUND(),
+    UI_ICON_LEFT(0x00, BAGL_GLYPH_ICON_CROSS),
+    UI_ICON_RIGHT(0x00, BAGL_GLYPH_ICON_CHECK),
     {{BAGL_LABELINE, 0x01, 0, 12, 128, 32, 0, 0, 0, 0xFFFFFF, 0x000000,
       BAGL_FONT_OPEN_SANS_EXTRABOLD_11px | BAGL_FONT_ALIGNMENT_CENTER, 0},
      "Confirm",
@@ -1987,7 +1983,7 @@ const bagl_element_t ui_approval_simple_nanos[] = {
      NULL},
 
     {{BAGL_LABELINE, 0x02, 0, 12, 128, 32, 0, 0, 0, 0xFFFFFF, 0x000000,
-      BAGL_FONT_OPEN_SANS_REGULAR_11px | BAGL_FONT_ALIGNMENT_CENTER, 0},
+      BAGL_FONT_OPEN_SANS_EXTRABOLD_11px | BAGL_FONT_ALIGNMENT_CENTER, 0},
      "Transaction Type",
      0,
      0,
@@ -1996,7 +1992,7 @@ const bagl_element_t ui_approval_simple_nanos[] = {
      NULL,
      NULL},
     {{BAGL_LABELINE, 0x02, 23, 26, 82, 12, 0x80 | 10, 0, 0, 0xFFFFFF, 0x000000,
-      BAGL_FONT_OPEN_SANS_EXTRABOLD_11px | BAGL_FONT_ALIGNMENT_CENTER, 26},
+      BAGL_FONT_OPEN_SANS_REGULAR_11px | BAGL_FONT_ALIGNMENT_CENTER, 26},
      (char *)fullContract,
      0,
      0,
@@ -4188,7 +4184,7 @@ void handleSign(uint8_t p1, uint8_t p2, uint8_t *workBuffer,
             0, transactionContext.hash, 32);
 
     if (txContent.permission_id>0){
-        snprintf(fromAddress, 5, "P%d - ",txContent.permission_id);
+        snprintf((char *)fromAddress, 5, "P%d - ",txContent.permission_id);
         getBase58FromAddres(txContent.account, (void *)(fromAddress+4), &sha2);
         fromAddress[BASE58CHECK_ADDRESS_SIZE+5]='\0';
     } else {
@@ -4344,6 +4340,26 @@ void handleSign(uint8_t p1, uint8_t p2, uint8_t *workBuffer,
             #elif defined(TARGET_NANOX)
                 ux_flow_init(0,
                     ((txContent.dataBytes>0)? ux_approval_exchange_transaction_data_warning_flow : ux_approval_exchange_transaction_flow),
+                    NULL);
+            #endif // #if TARGET_ID
+        break;
+        case VOTEWITNESSCONTRACT:
+            // vote for SR
+            if (!setContractType(txContent.contractType, (void*)fullContract)) THROW(0x6A80);
+
+            // row transaction hash
+            array_hexstr((char *)fullHash, transactionContext.hash, 32);
+
+            #if defined(TARGET_BLUE)
+                G_ui_approval_blue_state = APPROVAL_TRANSACTION;
+                ui_approval_simple_transaction_blue_init();
+            #elif defined(TARGET_NANOS)
+                ux_step = 0;
+                ux_step_count = 3;
+                UX_DISPLAY(ui_approval_vote_witness_nanos,(bagl_element_callback_t) ui_approval_simple_prepro);
+            #elif defined(TARGET_NANOX)
+                ux_flow_init(0,
+                    ((txContent.dataBytes>0)? ux_approval_st_data_warning_flow : ux_approval_st_flow),
                     NULL);
             #endif // #if TARGET_ID
         break;

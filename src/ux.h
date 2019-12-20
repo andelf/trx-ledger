@@ -1,6 +1,22 @@
 #include <bagl.h>
 
-// type, userid, x, y, w, h, str, rad, fill, fg, bg, fid, iid, txt, touchparams...
+/*
+{
+  bagl_components_type_e type;
+  unsigned char userid;
+  short x; // allow for out of screen rendering
+  short y; // allow for out of screen rendering
+  unsigned short width;
+  unsigned short height;
+  unsigned char stroke;
+  unsigned char radius;
+  unsigned char fill;
+  unsigned int fgcolor;
+  unsigned int bgcolor;
+  unsigned short font_id;
+  unsigned char icon_id;
+}
+*/
 
 // UI elements
 #define UI_BACKGROUND()                                                                        \
@@ -37,7 +53,7 @@
             (char *)text, 0, 0, 0, NULL, NULL, NULL                     \
     }
 
-#define UI_TITLE_TEXT(userid, text)                                     \
+#define UI_TEXT_TOP(userid, text)                                     \
     {                                                                   \
         {BAGL_LABELINE,                                                 \
          userid,                                                        \
@@ -55,7 +71,7 @@
             (char *)text, 0, 0, 0, NULL, NULL, NULL                     \
     }
 
-#define UI_CONTENT_TEXT(userid, text)                                     \
+#define UI_TEXT_BOTTOM(userid, text)                                     \
     {                                                                     \
         {BAGL_LABELINE,                                                   \
          userid,                                                          \

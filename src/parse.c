@@ -960,19 +960,32 @@ uint16_t processTx(txContext_t *context, uint8_t *buffer,
                                         break;
                                     case 2: //votes
                                         if (type!=2) THROW(0x6a80);
-                                        count = parseVariant(context, buffer, &offset,
-                                                                length, &tmpNumber);
-                                        if (tmpNumber>255 || (tmpNumber+offset)>length) {
-                                            if (addToQueue(context, buffer+offset-count-1, length-offset+count+1 )){
-                                                count =0;
-                                                offset = length;
-                                                break;
-                                            }else THROW(0x6a80);
-                                        }else{
-                                            content->amount++;
-                                            count += (uint8_t)(tmpNumber&0xFF)+1;
-                                            offset += (uint8_t)(tmpNumber&0xFF);
+                                        count = parseVariant(context, buffer, &offset, length, &tmpNumber);
+
+                                        // vote_address
+                                        if (buffer[offset]!=0x0A) THROW(0x6a81);
+                                        offset++; count++;
+                                        count += parseAddress(context, buffer, &offset, length,
+                                                content->account); // FIXME: use my account to ...2333
+
+                                        if ((tmpNumber)>255) THROW(0x6a82);
+                                        count += (uint8_t)(tmpNumber&0xFF);
+                                        offset += (uint8_t)(tmpNumber&0xFF);
+                                        if (offset>length) {
+                                            uint8_t pending = (offset-length);
+                                            if (!addToQueue(context,buffer+offset-count-1, count-pending+1)) THROW(0x6a83);
+                                            count = 0;
+                                            offset=length;
+                                            break;
                                         }
+
+                                        if (buffer[offset]!=0x12) THROW(0x6a00 + buffer[offset]);
+                                        offset++; count++;
+                                        count += parseVariant(context, buffer, &offset,
+                                                                length, &tmpNumber);
+                                        // tmpNumber is ...
+                                        PRINTF("Contract Size: %d\n",(uint32_t)tmpNumber);
+                                        count++;
                                         break;
                                     default:
                                         // INVALID
