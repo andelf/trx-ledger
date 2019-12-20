@@ -31,39 +31,39 @@ void getAddressFromPublicKey(uint8_t *publicKey, uint8_t *address,
     cx_keccak_init(sha3Context, 256);
     cx_hash((cx_hash_t *)sha3Context, CX_LAST, publicKey + 1, 64,
             hashAddress, 32);
-    
+
     os_memmove(address, hashAddress + 11, 21);
     address[0] = ADD_PRE_FIX_BYTE_MAINNET;
-    
+
 }
 
 void getBase58FromAddres(uint8_t *address, uint8_t *out,
                                 cx_sha256_t* sha2) {
     uint8_t sha256[32];
     uint8_t addchecksum[ADDRESS_SIZE+4];
-    
+
     cx_sha256_init(sha2);
     cx_hash((cx_hash_t*)sha2, CX_LAST, address, 21, sha256, 32);
     cx_sha256_init(sha2);
     cx_hash((cx_hash_t*)sha2, CX_LAST, sha256, 32, sha256, 32);
-    
+
     os_memmove(addchecksum, address , ADDRESS_SIZE);
     os_memmove(addchecksum+ADDRESS_SIZE, sha256, 4);
-    
-    
+
+
     encode_base_58(&addchecksum[0],25,(char *)out,BASE58CHECK_ADDRESS_SIZE);
-    
+
 }
 
 void transactionHash(uint8_t *raw, uint16_t dataLength,
                         uint8_t *out, cx_sha256_t* sha2) {
-   
+
     cx_sha256_init(sha2);
-    cx_hash((cx_hash_t*)sha2, CX_LAST, raw, dataLength, out, 32);    
+    cx_hash((cx_hash_t*)sha2, CX_LAST, raw, dataLength, out, 32);
 }
 
 void signTransaction(transactionContext_t *transactionContext) {
-   
+
     uint8_t privateKeyData[32];
     cx_ecfp_private_key_t privateKey;
     uint8_t rLength, sLength, rOffset, sOffset;
@@ -88,7 +88,7 @@ void signTransaction(transactionContext_t *transactionContext) {
     sOffset = (sLength == 33 ? 1 : 0);
     os_memmove(transactionContext->signature, signature + 4 + rOffset, 32);
     os_memmove(transactionContext->signature + 32, signature + 4 + rLength + 2 + sOffset, 32);
-    transactionContext->signature[64] = 0x00;
+    transactionContext->signature[64] = 0x00;  // 最终签名内容
     if (info & CX_ECCINFO_PARITY_ODD) {
         transactionContext->signature[64] |= 0x01;
     }
@@ -99,7 +99,7 @@ void signTransaction(transactionContext_t *transactionContext) {
 }
 const unsigned char hex_digits[] = {'0', '1', '2', '3', '4', '5', '6', '7',
                                     '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
-                                    
+
 void array_hexstr(char *strbuf, const void *bin, unsigned int len) {
     while (len--) {
         *strbuf++ = hex_digits[((*((char *)bin)) >> 4) & 0xF];

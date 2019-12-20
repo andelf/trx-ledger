@@ -22,7 +22,7 @@
 #include "settings.h"
 
 tokenDefinition_t* getKnownToken(txContent_t *context) {
-    uint8_t i;
+    uint16_t i;
 
     tokenDefinition_t *currentToken = NULL;
     for (i=0; i<NUM_TOKENS_TRC20; i++) {
@@ -136,7 +136,7 @@ bool setContractType(uint8_t type, void * out){
             os_memmove(out,"Vote Asset\0", 11);
             break;
         case VOTEWITNESSCONTRACT:
-            os_memmove(out,"Vote Witness\0", 13);
+            os_memmove(out,"Vote for SR\0", 13);
             break;
         case WITNESSCREATECONTRACT:
             os_memmove(out,"Witness Create\0", 15);
