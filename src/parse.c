@@ -978,7 +978,7 @@ uint16_t processTx(txContext_t *context, uint8_t *buffer,
                                             offset=length;
                                             break;
                                         }
-
+                                        // what 0xe0
                                         if (buffer[offset]!=0x12) THROW(0x6a00 + buffer[offset]);
                                         offset++; count++;
                                         count += parseVariant(context, buffer, &offset,
