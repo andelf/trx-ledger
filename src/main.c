@@ -1938,10 +1938,10 @@ const bagl_element_t ui_approval_vote_witness_nanos[] = {
     UI_ICON_RIGHT(0x00, BAGL_GLYPH_ICON_CHECK),
     UI_TEXT_TOP(0x01, "Confirm"),
     UI_TEXT_BOTTOM(0x01, "Vote for SR"),
-    UI_TEXT_TOP(0x03, "Send From"),
-    UI_TEXT_BOTTOM(0x03, fromAddress),
-    UI_TEXT_TOP(0x02, "Hash"),
-    UI_TEXT_BOTTOM(0x02, fullHash),
+    UI_TEXT_TOP(0x02, "Send From"),
+    UI_TEXT_BOTTOM(0x02, fromAddress),
+    UI_TEXT_TOP(0x03, "Hash"),
+    UI_TEXT_BOTTOM(0x03, fullHash),
 };
 unsigned int ui_approval_vote_witness_nanos_button(unsigned int button_mask,
                                      unsigned int button_mask_counter) {

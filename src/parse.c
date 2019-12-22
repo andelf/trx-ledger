@@ -957,39 +957,37 @@ uint16_t processTx(txContext_t *context, uint8_t *buffer,
                                         if (count==0) break;
                                         count+=2;
                                         content->amount=0;
+                                        content->numOfVotes = 0;
                                         break;
                                     case 2: //votes
-                                        if (type!=2) THROW(0x6a80);
-                                        count = parseVariant(context, buffer, &offset, length, &tmpNumber);
+                                        if (type!=2) THROW(0x6a8a);
 
-                                        // vote_address
-                                        if (buffer[offset]!=0x0A) THROW(0x6a81);
+                                        count = parseVariant(context, buffer, &offset, length, NULL);  // 19
+
+                                        if (buffer[offset]!=0x0a) THROW(0x6a81);  // vote_address
                                         offset++; count++;
+
                                         count += parseAddress(context, buffer, &offset, length,
-                                                content->account); // FIXME: use my account to ...2333
+                                                content->voteAddresses[content->numOfVotes]);
+                                        count += 2;
 
-                                        if ((tmpNumber)>255) THROW(0x6a82);
-                                        count += (uint8_t)(tmpNumber&0xFF);
-                                        offset += (uint8_t)(tmpNumber&0xFF);
-                                        if (offset>length) {
-                                            uint8_t pending = (offset-length);
-                                            if (!addToQueue(context,buffer+offset-count-1, count-pending+1)) THROW(0x6a83);
-                                            count = 0;
-                                            offset=length;
-                                            break;
-                                        }
-                                        // what 0xe0
-                                        if (buffer[offset]!=0x12) THROW(0x6a00 + buffer[offset]);
-                                        offset++; count++;
+                                        if (buffer[offset]!=0x10) THROW(0x6a84);  // vote_num
+
                                         count += parseVariant(context, buffer, &offset,
-                                                                length, &tmpNumber);
-                                        // tmpNumber is ...
-                                        PRINTF("Contract Size: %d\n",(uint32_t)tmpNumber);
-                                        count++;
+                                                                length, &content->voteCounts[content->numOfVotes]);
+                                        count += 1;
+                                        offset += 1;
+
+                                        content->numOfVotes += 1;
+
+                                        if (content->numOfVotes > 3) {
+                                            THROW(0x6a8b); // too many votes
+                                        }
                                         break;
                                     default:
+                                        THROW(0x6c00 + field);
                                         // INVALID
-                                        THROW(0x6a80);
+                                        THROW(0x6a83);
                                 }
                             break;
                             case FREEZEBALANCECONTRACT: // Freeze Balance Contract

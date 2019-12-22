@@ -77,7 +77,7 @@ typedef struct txContext_t {
     uint8_t queueBuffer[60];
     uint8_t queueBufferLength;
     uint32_t getNext;
-    // 
+    //
     uint8_t stage;
     stage_t stageQueue[3];
 } txContext_t;
@@ -110,6 +110,9 @@ typedef struct txContent_t {
     uint8_t decimals[2];
     uint8_t tokenNames[2][MAX_TOKEN_LENGTH];
     uint8_t tokenNamesLength[2];
+    uint8_t voteAddresses[3][ADDRESS_SIZE];
+    uint64_t voteCounts[3];
+    uint8_t numOfVotes;
     uint8_t resource;
     uint8_t TRC20Method;
     uint32_t customSelector;
