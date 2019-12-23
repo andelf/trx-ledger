@@ -1936,12 +1936,28 @@ const bagl_element_t ui_approval_vote_witness_nanos[] = {
     UI_BACKGROUND(),
     UI_ICON_LEFT(0x00, BAGL_GLYPH_ICON_CROSS),
     UI_ICON_RIGHT(0x00, BAGL_GLYPH_ICON_CHECK),
+
     UI_TEXT_TOP(0x01, "Confirm"),
     UI_TEXT_BOTTOM(0x01, "Vote for SR"),
     UI_TEXT_TOP(0x02, "Send From"),
     UI_TEXT_BOTTOM(0x02, fromAddress),
-    UI_TEXT_TOP(0x03, "Hash"),
-    UI_TEXT_BOTTOM(0x03, fullHash),
+    // UI_TEXT_TOP(0x03, "Hash"),
+    // UI_TEXT_BOTTOM(0x03, fullHash),
+
+    UI_TEXT_TOP(0x03, "Vote For #1"),
+    UI_TEXT_BOTTOM(0x03, toAddress),
+    UI_TEXT_TOP(0x04, "Num Votes #1"),
+    UI_TEXT_BOTTOM(0x04, G_io_apdu_buffer),
+
+    UI_TEXT_TOP(0x05, "Vote For #2"),
+    UI_TEXT_BOTTOM(0x05, fullContract),
+    UI_TEXT_TOP(0x06, "Num Votes #2"),
+    UI_TEXT_BOTTOM(0x06, G_io_apdu_buffer + 60),
+
+    UI_TEXT_TOP(0x07, "Vote For #3"),
+    UI_TEXT_BOTTOM(0x07, exchangeContractDetail),
+    UI_TEXT_TOP(0x08, "Num Votes #3"),
+    UI_TEXT_BOTTOM(0x08, G_io_apdu_buffer + 120),
 };
 unsigned int ui_approval_vote_witness_nanos_button(unsigned int button_mask,
                                      unsigned int button_mask_counter) {
@@ -4347,6 +4363,23 @@ void handleSign(uint8_t p1, uint8_t p2, uint8_t *workBuffer,
             // vote for SR
             if (!setContractType(txContent.contractType, (void*)fullContract)) THROW(0x6A80);
 
+            // vote count
+            for (uint8_t i=0; i<txContent.numOfVotes; i++) {
+                // NOTE: g_io_apdu_buffer is enough for 300 bytes
+                print_amount(txContent.voteCounts[i], (void *)G_io_apdu_buffer + 60 * i, 60, 0);
+                // reuse for vote addresses: toAddress, fullContract, exchangeContractDetail
+                if (i == 0) {
+                    getBase58FromAddres(txContent.voteAddresses[i], (void *)toAddress, &sha2);
+                    toAddress[BASE58CHECK_ADDRESS_SIZE]='\0';
+                } else if (i == 1) {
+                    getBase58FromAddres(txContent.voteAddresses[i], (void *)fullContract, &sha2);
+                    fullContract[BASE58CHECK_ADDRESS_SIZE]='\0';
+                } else if (i == 2) {
+                    getBase58FromAddres(txContent.voteAddresses[i], (void *)exchangeContractDetail, &sha2);
+                    exchangeContractDetail[BASE58CHECK_ADDRESS_SIZE]='\0';
+                }
+            }
+
             // row transaction hash
             array_hexstr((char *)fullHash, transactionContext.hash, 32);
 
@@ -4355,7 +4388,7 @@ void handleSign(uint8_t p1, uint8_t p2, uint8_t *workBuffer,
                 ui_approval_simple_transaction_blue_init();
             #elif defined(TARGET_NANOS)
                 ux_step = 0;
-                ux_step_count = 3;
+                ux_step_count = 2 + 2 * (txContent.numOfVotes);
                 UX_DISPLAY(ui_approval_vote_witness_nanos,(bagl_element_callback_t) ui_approval_simple_prepro);
             #elif defined(TARGET_NANOX)
                 ux_flow_init(0,

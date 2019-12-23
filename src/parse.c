@@ -972,11 +972,15 @@ uint16_t processTx(txContext_t *context, uint8_t *buffer,
                                         count += 2;
 
                                         if (buffer[offset]!=0x10) THROW(0x6a84);  // vote_num
+                                        offset++;
+                                        count++;
+
+                                        // THROW(0x6c00 + buffer[offset]);
 
                                         count += parseVariant(context, buffer, &offset,
                                                                 length, &content->voteCounts[content->numOfVotes]);
-                                        count += 1;
-                                        offset += 1;
+                                        // count += 1;
+                                        // offset += 1;
 
                                         content->numOfVotes += 1;
 
@@ -985,7 +989,6 @@ uint16_t processTx(txContext_t *context, uint8_t *buffer,
                                         }
                                         break;
                                     default:
-                                        THROW(0x6c00 + field);
                                         // INVALID
                                         THROW(0x6a83);
                                 }
