@@ -4361,19 +4361,19 @@ void handleSign(uint8_t p1, uint8_t p2, uint8_t *workBuffer,
         break;
         case VOTEWITNESSCONTRACT:
             // vote for SR
-            if (!setContractType(txContent.contractType, (void*)fullContract)) THROW(0x6A80);
+            // if (!setContractType(txContent.contractType, (void*)fullContract)) THROW(0x6A80);
 
             // vote count
             for (uint8_t i=0; i<txContent.numOfVotes; i++) {
-                // NOTE: g_io_apdu_buffer is enough for 300 bytes
-                print_amount(txContent.voteCounts[i], (void *)G_io_apdu_buffer + 60 * i, 60, 0);
-                // reuse for vote addresses: toAddress, fullContract, exchangeContractDetail
+                // NOTE: g_io_apdu_buffer is enough for 260 bytes
+                print_amount(txContent.voteCounts[i], (void *)(G_io_apdu_buffer + 60 * i), 60, 0);
+                // reuse for vote addresses: toAddress, fullHash, exchangeContractDetail
                 if (i == 0) {
                     getBase58FromAddres(txContent.voteAddresses[i], (void *)toAddress, &sha2);
                     toAddress[BASE58CHECK_ADDRESS_SIZE]='\0';
                 } else if (i == 1) {
-                    getBase58FromAddres(txContent.voteAddresses[i], (void *)fullContract, &sha2);
-                    fullContract[BASE58CHECK_ADDRESS_SIZE]='\0';
+                    getBase58FromAddres(txContent.voteAddresses[i], (void *)fullHash, &sha2);
+                    fullHash[BASE58CHECK_ADDRESS_SIZE]='\0';
                 } else if (i == 2) {
                     getBase58FromAddres(txContent.voteAddresses[i], (void *)exchangeContractDetail, &sha2);
                     exchangeContractDetail[BASE58CHECK_ADDRESS_SIZE]='\0';
@@ -4381,14 +4381,14 @@ void handleSign(uint8_t p1, uint8_t p2, uint8_t *workBuffer,
             }
 
             // row transaction hash
-            array_hexstr((char *)fullHash, transactionContext.hash, 32);
+            // array_hexstr((char *)fullHash, transactionContext.hash, 32);
 
             #if defined(TARGET_BLUE)
                 G_ui_approval_blue_state = APPROVAL_TRANSACTION;
                 ui_approval_simple_transaction_blue_init();
             #elif defined(TARGET_NANOS)
                 ux_step = 0;
-                ux_step_count = 2 + 2 * (txContent.numOfVotes);
+                ux_step_count = 2 + 2 * (txContent.numOfVotes) + 1;
                 UX_DISPLAY(ui_approval_vote_witness_nanos,(bagl_element_callback_t) ui_approval_simple_prepro);
             #elif defined(TARGET_NANOX)
                 ux_flow_init(0,

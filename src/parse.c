@@ -980,7 +980,6 @@ uint16_t processTx(txContext_t *context, uint8_t *buffer,
                                         count += parseVariant(context, buffer, &offset,
                                                                 length, &content->voteCounts[content->numOfVotes]);
                                         // count += 1;
-                                        // offset += 1;
 
                                         content->numOfVotes += 1;
 
