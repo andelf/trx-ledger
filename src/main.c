@@ -15,23 +15,20 @@
  *  limitations under the License.
  ********************************************************************************/
 
+#include <stdbool.h>
+#include <string.h>
+#include <sys/types.h>
+
 #include "os.h"
 #include "cx.h"
-#include <stdbool.h>
-#include <sys/types.h>
-#include "helpers.h"
-
 #include "os_io_seproxyhal.h"
-#include "string.h"
 
 #include "glyphs.h"
 
 #include "settings.h"
-
 #include "parse.h"
-#include "uint256.h"
-
 #include "tokens.h"
+#include "helpers.h"
 
 
 unsigned char G_io_seproxyhal_spi_buffer[IO_SEPROXYHAL_BUFFER_SIZE_B];
@@ -2791,20 +2788,12 @@ void handleGetPublicKey(uint8_t p1, uint8_t p2, uint8_t *dataBuffer,
 
 }
 
-void convertUint256BE(uint8_t *data, uint32_t length, uint256_t *target) {
-    uint8_t tmp[32];
-    os_memset(tmp, 0, 32);
-    os_memmove(tmp + 32 - length, data, length);
-    readu256BE(tmp, target);
-}
-
 // APDU Sign
 void handleSign(uint8_t p1, uint8_t p2, uint8_t *workBuffer,
                 uint16_t dataLength, volatile unsigned int *flags,
                 volatile unsigned int *tx) {
 
     UNUSED(tx);
-    uint256_t uint256;
 
     if (p2 != 0x00) {
         THROW(0x6B00);
@@ -2954,12 +2943,18 @@ void handleSign(uint8_t p1, uint8_t p2, uint8_t *workBuffer,
                     break;
                 }
 
-                convertUint256BE(txContent.TRC20Amount, 32, &uint256);
-                tostring256(&uint256, 10, (char *)G_io_apdu_buffer+100, 100);
-                if (!adjustDecimals((char *)G_io_apdu_buffer+100, strlen((const char *)G_io_apdu_buffer+100), (char *)G_io_apdu_buffer, 100, txContent.decimals[0]))
-                    THROW(0x6B00);
-            }else
+                // convertUint256BE(txContent.TRC20Amount, 32, &uint256);
+                // tostring256(&uint256, 10, (char *)G_io_apdu_buffer+100, 100);
+                // if (!adjustDecimals((char *)G_io_apdu_buffer+100, strlen((const char *)G_io_apdu_buffer+100), (char *)G_io_apdu_buffer, 100, ))
+                //    THROW(0x6B00);
+                PRINTF("amount %.*H\n", 32, txContent.TRC20Amount);
+                PRINTF("decimal %c\n", txContent.decimals[0]);
+
+                format_uint256_with_decimal(txContent.TRC20Amount, txContent.decimals[0], (char *)G_io_apdu_buffer);
+                PRINTF("format ok\n");
+            } else {
                 print_amount(txContent.amount[0],(void *)G_io_apdu_buffer,100, (txContent.contractType==TRANSFERCONTRACT)?SUN_DIG:txContent.decimals[0]);
+            }
 
             getBase58FromAddress(txContent.destination, (uint8_t *)toAddress,
                                  &sha2, HAS_SETTING(S_TRUNCATE_ADDRESS));
