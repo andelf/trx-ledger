@@ -24,7 +24,11 @@
   #include "helpers.h"
 #endif
 
-const uint8_t token_public_key[] = {0x04,0x92,0x49,0x1c,0x3f,0x95,0x4d,0x0a,0x2a,0x71,0xe7,0xf4,0x75,0xe3,0x0f,0xfb,0xeb,0x96,0x7a,0xaf,0xde,0x67,0x8f,0x44,0xa3,0xa3,0x26,0x4d,0x81,0x3f,0x49,0x8d,0x95,0x4b,0x3e,0x00,0x0f,0x4a,0x71,0xcb,0xcd,0xf4,0xc9,0x7c,0x60,0x9d,0x3d,0x20,0x7b,0x75,0x13,0x2a,0xee,0x66,0xc0,0x84,0x2d,0xd8,0xd0,0xf6,0xdd,0x50,0x54,0xaa,0x6c};
+// Original public key from klever-io
+const uint8_t token_public_key1[] = {0x04,0x92,0x49,0x1c,0x3f,0x95,0x4d,0x0a,0x2a,0x71,0xe7,0xf4,0x75,0xe3,0x0f,0xfb,0xeb,0x96,0x7a,0xaf,0xde,0x67,0x8f,0x44,0xa3,0xa3,0x26,0x4d,0x81,0x3f,0x49,0x8d,0x95,0x4b,0x3e,0x00,0x0f,0x4a,0x71,0xcb,0xcd,0xf4,0xc9,0x7c,0x60,0x9d,0x3d,0x20,0x7b,0x75,0x13,0x2a,0xee,0x66,0xc0,0x84,0x2d,0xd8,0xd0,0xf6,0xdd,0x50,0x54,0xaa,0x6c};
+// Official key of TKeAcHxgErbVXrG3N3TZiSV6AT566BHTj2
+// ref: https://tronprotocol.github.io/documentation-en/releases/
+const uint8_t token_public_key2[] = {0x04,0xdc,0x6c,0x48,0xa1,0x03,0xba,0xfa,0xb9,0x3a,0x24,0x9d,0x0b,0x7b,0x3e,0xaf,0x70,0x70,0xc4,0xe1,0x2a,0x3b,0x4f,0x9e,0x4c,0xa3,0xc3,0x46,0xc4,0x29,0x57,0xb6,0x92,0xfd,0xc9,0x30,0x96,0x08,0x7d,0xd2,0x8b,0xff,0x0b,0x58,0x82,0x50,0xd0,0x8b,0x04,0x8c,0x6f,0xc8,0x7d,0xd8,0x98,0x02,0xa9,0xee,0x24,0x81,0x99,0x94,0x3a,0x21,0x04};
 
 // a9059cbb -> transfer(address,uint256)
 // 095ea7b3 -> approve(address,uint256)
@@ -416,20 +420,29 @@ int verifyTokenNameID(const char *tokenId, const char *tokenName, uint8_t decima
 
     if (strlen(tokenId) > 32) return 0;
 
-    snprintf((char *)buffer, sizeof(buffer), "%s%s%c",tokenId, tokenName, decimals);
+    snprintf((char *)buffer, sizeof(buffer), "%s%s%c", tokenId, tokenName, decimals);
 
     cx_sha256_init(&sha2); //init sha
     cx_hash((cx_hash_t *)&sha2, CX_LAST, buffer, strlen(tokenId)+strlen(tokenName)+1, hash, 32);
 
-    cx_ecfp_init_public_key(CX_CURVE_256K1,(uint8_t *)PIC(&token_public_key), 65, &(publicKeyContext->publicKey));
 
+    cx_ecfp_init_public_key(CX_CURVE_256K1, (uint8_t *)PIC(&token_public_key1), 65, &(publicKeyContext->publicKey));
     io_seproxyhal_io_heartbeat();
-    int ret = cx_ecdsa_verify((cx_ecfp_public_key_t WIDE *)&(publicKeyContext->publicKey), CX_LAST,
+    int verified = cx_ecdsa_verify((cx_ecfp_public_key_t WIDE *)&(publicKeyContext->publicKey), CX_LAST,
                     CX_SHA256, hash, 32,
                     signature, signatureLength);
     io_seproxyhal_io_heartbeat();
 
-    return ret;
+    if (!verified) {
+        cx_ecfp_init_public_key(CX_CURVE_256K1, (uint8_t *)PIC(&token_public_key2), 65, &(publicKeyContext->publicKey));
+        io_seproxyhal_io_heartbeat();
+        verified = cx_ecdsa_verify((cx_ecfp_public_key_t WIDE *)&(publicKeyContext->publicKey), CX_LAST,
+                        CX_SHA256, hash, 32,
+                        signature, signatureLength);
+        io_seproxyhal_io_heartbeat();
+    }
+
+    return verified;
 }
 
 int verifyExchangeID(const unsigned char *exchangeValidation, uint8_t datLength, uint8_t *signature, uint8_t signatureLength, publicKeyContext_t *publicKeyContext){
@@ -439,13 +452,21 @@ int verifyExchangeID(const unsigned char *exchangeValidation, uint8_t datLength,
     cx_sha256_init(&sha2); //init sha
     cx_hash((cx_hash_t *)&sha2, CX_LAST, exchangeValidation, datLength, hash, 32);
 
-    cx_ecfp_init_public_key(CX_CURVE_256K1,(uint8_t *)PIC(&token_public_key), 65, &(publicKeyContext->publicKey));
-
+    cx_ecfp_init_public_key(CX_CURVE_256K1,(uint8_t *)PIC(&token_public_key1), 65, &(publicKeyContext->publicKey));
     io_seproxyhal_io_heartbeat();
-    int ret = cx_ecdsa_verify((cx_ecfp_public_key_t WIDE *)&(publicKeyContext->publicKey), CX_LAST,
+    int verified = cx_ecdsa_verify((cx_ecfp_public_key_t WIDE *)&(publicKeyContext->publicKey), CX_LAST,
                     CX_SHA256, hash, 32,
                     signature, signatureLength);
     io_seproxyhal_io_heartbeat();
 
-    return ret;
+    if (!verified) {
+        cx_ecfp_init_public_key(CX_CURVE_256K1, (uint8_t *)PIC(&token_public_key2), 65, &(publicKeyContext->publicKey));
+        io_seproxyhal_io_heartbeat();
+        verified = cx_ecdsa_verify((cx_ecfp_public_key_t WIDE *)&(publicKeyContext->publicKey), CX_LAST,
+                        CX_SHA256, hash, 32,
+                        signature, signatureLength);
+        io_seproxyhal_io_heartbeat();
+    }
+
+    return verified;
 }
